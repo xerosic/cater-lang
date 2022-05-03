@@ -1,6 +1,3 @@
-
-from email import parser
-
 import parser, virtualmachine
 
 print("Bazonga interpreter v0.1")
