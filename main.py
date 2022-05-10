@@ -12,8 +12,11 @@ argparser.add_argument('--log', type=str, metavar='level',
                        help='the level of the logger that should be set. default: WARN')
 
 args = argparser.parse_args()
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARN)
 if args.log is not None:
     utils.setLogLevel(args.log)
+
+logging.debug("Current log level: ", logging.getLevelName(logging.root.level))
 
 fileParser = parser.Parser(args.file)
 fileParser.parseFile()
