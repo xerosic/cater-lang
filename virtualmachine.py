@@ -1,6 +1,7 @@
 from enum import Enum
 import logging
 
+
 class Registers(Enum):
     EAX = 0
     EBX = 1
@@ -35,6 +36,6 @@ class VM:
                 case "dec":
                     for i in range(2, len(instr)):
                         self.registers[Registers[instr[1].upper()
-                                                 ].value] -= 1                                                 
+                                                 ].value] -= 1
                 case "prnt":
                     print(self.registers[Registers[instr[1].upper()].value])
