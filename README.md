@@ -1,5 +1,10 @@
-# esolang
-Esoteric programming language made as a joke (Name is still a WIP)
+# cater
+
+Esoteric programming language made as a joke. Name derives from the caterpillar meme, don't expect it to be something serious
+
+# help
+
+
 
 # requirements
 

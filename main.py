@@ -1,16 +1,19 @@
-import parser, virtualmachine
+import logging
+import parser
+import virtualmachine
+import utils
 
-def banner():
-    print("              __           ")
-    print("  _________ _/ /____  _____")
-    print(" / ___/ __ `/ __/ _ \/ ___/")
-    print("/ /__/ /_/ / /_/  __/ /    ")
-    print("\___/\__,_/\__/\___/_/     ")
-    print("                           ")
+import argparse
 
-banner()
+argparser = argparse.ArgumentParser(description=utils.banner())
+argparser.add_argument('file', metavar='input_file', type=str,
+                    help='the .ct source file to be interpreted')
+argparser.add_argument('--log', type=str, metavar='level', help='the level of the logger that should be set. default: WARN')
 
-fileParser = parser.Parser("main.bo")
+args = argparser.parse_args()
+if args.log is not None: utils.setLogLevel(args.log)
+
+fileParser = parser.Parser(args.file)
 fileParser.parseFile()
 
 vm = virtualmachine.VM()
