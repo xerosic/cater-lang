@@ -12,10 +12,13 @@ class Registers(Enum):
     CX = 6
     DX = 7
 
+    def byName(name: str) -> int:
+        return Registers[name].value
+
 
 class VM:
     def __init__(self) -> None:
-        self.registers = [0, 0, 0, 0, 0, 0]  # 6 Registers
+        self.registers = [0, 0, 0, 0, 0, 0, 0, 0]  # 8 Registers
         self.pc: int = 0
 
     def run(self, instructions: str) -> None:
@@ -23,19 +26,24 @@ class VM:
             match instr[0].lower():
                 case "add":
                     for i in range(2, len(instr)):
-                        self.registers[Registers[instr[1].upper()
-                                                 ].value] += int(instr[i])
+                        self.registers[Registers.byName(
+                            instr[1].upper())] += int(instr[i])
                 case "sub":
                     for i in range(2, len(instr)):
-                        self.registers[Registers[instr[1].upper()
-                                                 ].value] -= int(instr[i])
+                        self.registers[Registers.byName(
+                            instr[1].upper())] -= int(instr[i])
                 case "inc":
                     for i in range(2, len(instr)):
-                        self.registers[Registers[instr[1].upper()
-                                                 ].value] += 1
+                        self.registers[Registers.byName(instr[1].upper())] += 1
                 case "dec":
                     for i in range(2, len(instr)):
-                        self.registers[Registers[instr[1].upper()
-                                                 ].value] -= 1
+                        self.registers[Registers.byName(instr[1].upper())] -= 1
                 case "prnt":
-                    print(self.registers[Registers[instr[1].upper()].value])
+                    print(self.registers[Registers.byName(instr[1].upper())])
+                case "dbg":
+                    print(
+                        f"\n\nDEBUG PRINT REQUESTED BY PROGRAM AT LINE {self.pc + 1}\nDUMPING REGISTERS\n\n", end="")
+                    for i in range(0, len(self.registers)):
+                        print(f"  {Registers(i).name}: {self.registers[i]}")
+                    print(f"  PC: {self.pc}")
+            self.pc += 1

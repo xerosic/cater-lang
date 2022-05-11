@@ -1,2 +1,3 @@
 ADD EAX 1 1 4 6 9 1
 PRNT EAX
+DBG
