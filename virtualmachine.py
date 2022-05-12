@@ -1,6 +1,7 @@
 from enum import Enum
 import logging
-
+from logging import info, debug, warn, error, critical
+from typing import List
 
 class Registers(Enum):
     EAX = 0
@@ -14,12 +15,17 @@ class Registers(Enum):
 
     def byName(name: str) -> int:
         return Registers[name].value
+    def list() -> List:
+        return [x.name for x in Registers]
+
 
 
 class VM:
     def __init__(self) -> None:
         self.registers = [0, 0, 0, 0, 0, 0, 0, 0]  # 8 Registers
         self.pc: int = 0
+
+        debug(Registers.list())
 
     def run(self, instructions: str) -> None:
         for instr in instructions:
