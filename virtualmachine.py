@@ -1,55 +1,64 @@
 from enum import Enum
-import logging
 from logging import info, debug, warn, error, critical
 from typing import List
 
-class Registers(Enum):
-    EAX = 0
-    EBX = 1
-    ECX = 2
-    EDX = 3
-    AX = 4
-    BX = 5
-    CX = 6
-    DX = 7
+from parser import ArgType, Instruction, Registers
 
-    def byName(name: str) -> int:
-        return Registers[name].value
-    def list() -> List:
-        return [x.name for x in Registers]
 
+class Dynacall:
+    def __init__(self, registers: list[int], pc: int) -> None:
+        self.registers: list[int] = registers
+        self.pc: int = pc
+
+    def vm_add(self, instruction: Instruction) -> None:
+        for arg in instruction.args:
+            if arg.type is ArgType.VALUE:
+                self.registers[Registers.byName(
+                    instruction.args[0].value)] += int(arg.value)
+
+    def vm_sub(self, instruction: Instruction) -> None:
+        for arg in instruction.args:
+            if arg.type is ArgType.VALUE:
+                self.registers[Registers.byName(
+                    instruction.args[0].value)] -= int(arg.value)
+
+    def vm_inc(self, instruction: Instruction) -> None:
+        for arg in instruction.args:
+            if arg.type is ArgType.VALUE:
+                self.registers[Registers.byName(
+                    instruction.args[0].value)] += 1
+
+    def vm_dec(self, instruction: Instruction) -> None:
+        for arg in instruction.args:
+            if arg.type is ArgType.VALUE:
+                self.registers[Registers.byName(
+                    instruction.args[0].value)] -= 1
+
+    def vm_prnt(self, instruction: Instruction) -> None:
+        print(self.registers[Registers.byName(instruction.args[0].value)])
+
+    def vm_dbg(self, instruction: Instruction) -> None:
+        print(
+            f"\n\nDEBUG PRINT REQUESTED BY PROGRAM AT LINE {self.pc + 1}\nDUMPING REGISTERS\n", end="")
+        for i in range(0, len(self.registers)):
+            print(f"  {Registers(i).name}: {self.registers[i]}")
+        print(f"PC: {self.pc}")
 
 
 class VM:
     def __init__(self) -> None:
-        self.registers = [0, 0, 0, 0, 0, 0, 0, 0]  # 8 Registers
+        self.registers: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]  # 8 Registers
         self.pc: int = 0
 
-        debug(Registers.list())
-
-    def run(self, instructions: str) -> None:
+    def run(self, instructions: list[Instruction]) -> None:
+        ddt = Dynacall(self.registers, self.pc)
         for instr in instructions:
-            match instr[0].lower():
-                case "add":
-                    for i in range(2, len(instr)):
-                        self.registers[Registers.byName(
-                            instr[1].upper())] += int(instr[i])
-                case "sub":
-                    for i in range(2, len(instr)):
-                        self.registers[Registers.byName(
-                            instr[1].upper())] -= int(instr[i])
-                case "inc":
-                    for i in range(2, len(instr)):
-                        self.registers[Registers.byName(instr[1].upper())] += 1
-                case "dec":
-                    for i in range(2, len(instr)):
-                        self.registers[Registers.byName(instr[1].upper())] -= 1
-                case "prnt":
-                    print(self.registers[Registers.byName(instr[1].upper())])
-                case "dbg":
-                    print(
-                        f"\n\nDEBUG PRINT REQUESTED BY PROGRAM AT LINE {self.pc + 1}\nDUMPING REGISTERS\n\n", end="")
-                    for i in range(0, len(self.registers)):
-                        print(f"  {Registers(i).name}: {self.registers[i]}")
-                    print(f"  PC: {self.pc}")
-            self.pc += 1
+            try:
+                getattr(ddt, 'vm_%s' % instr.op.lower())(instr)
+                ddt.pc += 1
+                self.pc = ddt.pc
+                self.registers = ddt.registers
+            except AttributeError:
+                critical(
+                    f"Illegal instruction '{instr.op}' on line {self.pc}. Aborting...")
+                quit(-1)

@@ -3,18 +3,35 @@ from os import path
 from typing import List
 from logging import info, debug, warn, error, critical
 
-from virtualmachine import Registers
+
+class Registers(Enum):
+    EAX = 0
+    EBX = 1
+    ECX = 2
+    EDX = 3
+    AX = 4
+    BX = 5
+    CX = 6
+    DX = 7
+
+    def byName(name: str) -> int:
+        return Registers[name].value
+
+    def list() -> List:
+        return [x.name for x in Registers]
 
 
 class ArgType(Enum):
     REG = 0
     MEM = 1
     VALUE = 2
+    VIRT = 3
 
 
 class Argument:
     def __init__(self, arg: str) -> None:
-        pass
+        self.determineType(arg)
+        self.value = arg
 
     def determineType(self, arg: str) -> None:
         if arg in Registers.list():
@@ -28,8 +45,6 @@ class Instruction:
         self.line = line
         self.parseBaseInstruction()
         self.parseArguments()
-        debug(self.op)
-        #debug(self.args[0])
 
     def parseBaseInstruction(self):
         self.op = ""
@@ -38,24 +53,26 @@ class Instruction:
                 self.op += c
             else:
                 break
-    
+
     def parseArguments(self):
         self.args: List = []
         self.argbuffer: str = ""
-        self.argumentLine: str = self.line.replace(self.op, "").replace("\n", "")
+        self.argLine: str = self.line.replace(
+            self.op, "").replace("\n", "").strip()
 
-        for c in self.argumentLine:
-            if c is ' ':
-                self.argumentLine.removeprefix
+        debug(self.argLine)
 
-        for c in self.argumentLine:
+        for c in self.argLine:
             if c is not ' ':
                 self.argbuffer += c
-                debug(f"Added char '{c}' in '{self.argbuffer}'")
             else:
-                debug(f"Argument: {self.argbuffer}")
+                debug(f"argBuffer: {self.argbuffer}")
                 self.args.append(Argument(self.argbuffer))
                 self.argbuffer = ""
+
+        for arg in self.args:
+            debug(f"Loaded argument: '{arg.value}' ({arg.type})")
+
 
 class Parser:
     def __init__(self, file_name: str) -> None:
@@ -75,6 +92,8 @@ class Parser:
 
     def parseInstructions(self) -> None:
         self.instructions = []
+
+        info("[parser] injecting virtual arguments")
+
         for line in self.file:
-            Instruction(line)
-            self.instructions.append(line.replace("\n", "").split(" "))
+            self.instructions.append(Instruction(line + " ^"))
